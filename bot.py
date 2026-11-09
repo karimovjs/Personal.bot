@@ -139,7 +139,7 @@ async def order_start(message: Message, state: FSMContext):
 async def order_name(message: Message, state: FSMContext):
     await state.update_data(name=message.text)
     await state.set_state(OrderSite.surname)
-    await message.answer("Familiyangizni kiriting:")
+    await message.answer("Telefon raqamingizni kiriting:")
 
 
 @dp.message(OrderSite.surname)
@@ -175,7 +175,7 @@ async def order_type(callback: CallbackQuery, state: FSMContext):
     admin_text = (
         "🆕 <b>Yangi ariza — Sayt buyurtmasi</b>\n\n"
         f"👤 Ism: {data['name']}\n"
-        f"👤 Familiya: {data['surname']}\n"
+        f"👤 Telefon raqami: {data['surname']}\n"
         f"📌 Sayt turi: {site_type}\n"
         f"🆔 Telegram ID: {user['telegram_id']}\n"
         f"🔗 Profil: {user['profile']}\n"
@@ -187,7 +187,7 @@ async def order_type(callback: CallbackQuery, state: FSMContext):
 
     await callback.message.answer(
         "✅ Arizangiz muvaffaqiyatli yuborildi!\n"
-        "@shanurkarimov Admin bilan bog'laning.",
+        "Tez orada siz bilan bog'lanaman.",
         reply_markup=main_menu(),
     )
 
@@ -244,7 +244,7 @@ async def enroll_name(message: Message, state: FSMContext):
     await state.update_data(name=message.text)
     await state.set_state(EnrollCourse.surname)
 
-    await message.answer("Familiyangizni kiriting:")
+    await message.answer("Telefon raqamingizni kiriting:")
 
 
 @dp.message(EnrollCourse.surname)
@@ -263,7 +263,7 @@ async def enroll_course(message: Message, state: FSMContext):
     admin_text = (
         "🆕 <b>Yangi ariza — Kursga yozilish</b>\n\n"
         f"👤 Ism: {data['name']}\n"
-        f"👤 Familiya: {data['surname']}\n"
+        f"👤 Telefon raqami: {data['surname']}\n"
         f"📌 Kurs: {message.text}\n"
         f"🆔 Telegram ID: {user['telegram_id']}\n"
         f"🔗 Profil: {user['profile']}\n"
