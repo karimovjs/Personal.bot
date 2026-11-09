@@ -147,6 +147,7 @@ async def order_type(callback: CallbackQuery, state: FSMContext):
     admin_text = (
         "🆕 <b>Yangi ariza — Sayt buyurtmasi</b>\n\n"
         f"👤 Ism: {data['name']}\n"
+        f"📱 Telefon: {data['phone']}\n"
         f"📌 Sayt turi: {site_type}\n"
         "Adminga murojat qiling: @shanurkarimov\n"
 
@@ -204,6 +205,7 @@ async def enroll_course(message: Message, state: FSMContext):
     admin_text = (
         "🆕 <b>Yangi ariza — Kursga yozilish</b>\n\n"
         f"👤 Ism: {data['name']}\n"
+        f"📱 Telefon: {data['phone']}\n"
         f"📌 Kurs: {message.text}\n"
         f"🆔 Telegram ID: {user['telegram_id']}\n"
         f"🔗 Profil: {user['profile']}\n"
