@@ -1,7 +1,5 @@
-
 import asyncio
 import os
-import html
 from datetime import datetime
 
 from aiogram import Bot, Dispatcher, F
@@ -31,76 +29,31 @@ dp = Dispatcher()
 
 def main_menu() -> ReplyKeyboardMarkup:
     kb = [
-        [
-            KeyboardButton(text="👤 Men haqimda"),
-            KeyboardButton(text="💻 Xizmatlarim")
-        ],
-        [
-            KeyboardButton(text="🌐 Sayt buyurtma qilish"),
-            KeyboardButton(text="🎓 Kurslarim")
-        ],
-        [
-            KeyboardButton(text="📝 Kursga yozilish"),
-            KeyboardButton(text="🚀 Loyihalarim")
-        ],
-        [
-            KeyboardButton(text="📩 Bog'lanish")
-        ],
+        [KeyboardButton(text="👤 Men haqimda"), KeyboardButton(text="💻 Xizmatlarim")],
+        [KeyboardButton(text="🌐 Sayt buyurtma qilish"), KeyboardButton(text="🎓 Kurslarim")],
+        [KeyboardButton(text="📝 Kursga yozilish"), KeyboardButton(text="🚀 Loyihalarim")],
+        [KeyboardButton(text="📩 Bog'lanish")],
     ]
-
-    return ReplyKeyboardMarkup(
-        keyboard=kb,
-        resize_keyboard=True
-    )
+    return ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
 
 
 def back_menu() -> ReplyKeyboardMarkup:
-    kb = [
-        [
-            KeyboardButton(text="⬅️ Ortga"),
-            KeyboardButton(text="🏠 Asosiy menyu")
-        ]
-    ]
-
-    return ReplyKeyboardMarkup(
-        keyboard=kb,
-        resize_keyboard=True
-    )
-
-
-def phone_keyboard() -> ReplyKeyboardMarkup:
-    kb = [
-        [
-            KeyboardButton(
-                text="📱 Telefon raqamni yuborish",
-                request_contact=True
-            )
-        ],
-        [
-            KeyboardButton(text="⬅️ Ortga"),
-            KeyboardButton(text="🏠 Asosiy menyu")
-        ]
-    ]
-
-    return ReplyKeyboardMarkup(
-        keyboard=kb,
-        resize_keyboard=True,
-        one_time_keyboard=True
-    )
+    kb = [[KeyboardButton(text="⬅️ Ortga"), KeyboardButton(text="🏠 Asosiy menyu")]]
+    return ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
 
 
 # ==================== FSM HOLATLARI ====================
 
 class OrderSite(StatesGroup):
     name = State()
+    surname = State()
     site_type = State()
-    phone = State()
 
 
 class EnrollCourse(StatesGroup):
     name = State()
+    surname = State()
     course = State()
-    phone = State()
 
 
 # ==================== YORDAMCHI FUNKSIYA ====================
@@ -110,9 +63,9 @@ def get_user_info(message: Message) -> dict:
     username = user.username
 
     if username:
-        profile = f"@{username}"
+        profile = f"https://t.me/{username}"
     else:
-        profile = f"Telegram profil: tg://user?id={user.id}"
+        profile = f"tg://user?id={user.id}"
 
     return {
         "telegram_id": user.id,
@@ -124,11 +77,9 @@ def get_user_info(message: Message) -> dict:
 # ==================== ASOSIY MENYU ====================
 
 @dp.message(CommandStart())
-async def start_handler(message: Message, state: FSMContext):
-    await state.clear()
-
+async def start_handler(message: Message):
     await message.answer(
-        f"Assalomu alaykum, {html.escape(message.from_user.first_name)}! 👋\n\n"
+        f"Assalomu alaykum, {message.from_user.first_name}! 👋\n\n"
         "Men Shanur Karimovning shaxsiy botiman.\n"
         "Quyidagi bo'limlardan birini tanlang:",
         reply_markup=main_menu(),
@@ -138,21 +89,13 @@ async def start_handler(message: Message, state: FSMContext):
 @dp.message(F.text == "🏠 Asosiy menyu")
 async def home_handler(message: Message, state: FSMContext):
     await state.clear()
-
-    await message.answer(
-        "🏠 Asosiy menyu",
-        reply_markup=main_menu()
-    )
+    await message.answer("🏠 Asosiy menyu", reply_markup=main_menu())
 
 
 @dp.message(F.text == "⬅️ Ortga")
 async def back_handler(message: Message, state: FSMContext):
     await state.clear()
-
-    await message.answer(
-        "🏠 Asosiy menyu",
-        reply_markup=main_menu()
-    )
+    await message.answer("🏠 Asosiy menyu", reply_markup=main_menu())
 
 
 # ==================== 1. MEN HAQIMDA ====================
@@ -161,16 +104,11 @@ async def back_handler(message: Message, state: FSMContext):
 async def about_handler(message: Message):
     text = (
         "👤 <b>Shanur Karimov</b>\n\n"
-        "💼 <b>Kasbiy yo'nalish:</b> Developer\n"
+        "💼 <b>Kasbiy yo'nalish:</b> Fullstack Developer\n"
         "💡 <b>Daraja:</b> Midle\n"
         "🛠 <b>O'rganayotgan texnologiyalar:</b> Backend\n"
     )
-
-    await message.answer(
-        text,
-        reply_markup=back_menu(),
-        parse_mode="HTML"
-    )
+    await message.answer(text, reply_markup=back_menu(), parse_mode="HTML")
 
 
 # ==================== 2. XIZMATLARIM ====================
@@ -185,12 +123,7 @@ async def services_handler(message: Message):
         "4. <b>Telegram bot</b>\n"
         "5. <b>Maxsus web loyihalar</b>\n"
     )
-
-    await message.answer(
-        text,
-        reply_markup=back_menu(),
-        parse_mode="HTML"
-    )
+    await message.answer(text, reply_markup=back_menu(), parse_mode="HTML")
 
 
 # ==================== 3. SAYT BUYURTMA QILISH ====================
@@ -199,61 +132,30 @@ async def services_handler(message: Message):
 async def order_start(message: Message, state: FSMContext):
     await state.clear()
     await state.set_state(OrderSite.name)
-
-    await message.answer(
-        "Ismingizni kiriting:",
-        reply_markup=back_menu()
-    )
+    await message.answer("Ismingizni kiriting:", reply_markup=back_menu())
 
 
 @dp.message(OrderSite.name)
 async def order_name(message: Message, state: FSMContext):
-    if not message.text:
-        await message.answer("Iltimos, ismingizni matn ko'rinishida kiriting.")
-        return
-
     await state.update_data(name=message.text)
+    await state.set_state(OrderSite.surname)
+    await message.answer("Familiyangizni kiriting:")
+
+
+@dp.message(OrderSite.surname)
+async def order_surname(message: Message, state: FSMContext):
+    await state.update_data(surname=message.text)
     await state.set_state(OrderSite.site_type)
 
-    kb = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(
-                    text="Landing page",
-                    callback_data="site_landing"
-                )
-            ],
-            [
-                InlineKeyboardButton(
-                    text="Portfolio sayt",
-                    callback_data="site_portfolio"
-                )
-            ],
-            [
-                InlineKeyboardButton(
-                    text="Biznes sayt",
-                    callback_data="site_biznes"
-                )
-            ],
-            [
-                InlineKeyboardButton(
-                    text="Telegram bot",
-                    callback_data="site_bot"
-                )
-            ],
-            [
-                InlineKeyboardButton(
-                    text="Maxsus loyiha",
-                    callback_data="site_maxsus"
-                )
-            ],
-        ]
-    )
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Landing page", callback_data="site_landing")],
+        [InlineKeyboardButton(text="Portfolio sayt", callback_data="site_portfolio")],
+        [InlineKeyboardButton(text="Biznes sayt", callback_data="site_biznes")],
+        [InlineKeyboardButton(text="Telegram bot", callback_data="site_bot")],
+        [InlineKeyboardButton(text="Maxsus loyiha", callback_data="site_maxsus")],
+    ])
 
-    await message.answer(
-        "Sayt turini tanlang:",
-        reply_markup=kb
-    )
+    await message.answer("Sayt turini tanlang:", reply_markup=kb)
 
 
 @dp.callback_query(OrderSite.site_type, F.data.startswith("site_"))
@@ -266,63 +168,31 @@ async def order_type(callback: CallbackQuery, state: FSMContext):
         "site_maxsus": "Maxsus loyiha",
     }
 
-    site_type = site_map.get(callback.data)
-
-    if not site_type:
-        await callback.answer("Noto'g'ri tanlov!")
-        return
-
-    await state.update_data(site_type=site_type)
-    await state.set_state(OrderSite.phone)
-
-    await callback.message.answer(
-        "📱 Telefon raqamingizni yuboring:",
-        reply_markup=phone_keyboard()
-    )
-
-    await callback.answer()
-
-
-@dp.message(OrderSite.phone, F.contact)
-async def order_phone(message: Message, state: FSMContext):
-    contact = message.contact
-
-    if contact.user_id != message.from_user.id:
-        await message.answer(
-            "Iltimos, o'zingizning telefon raqamingizni yuboring."
-        )
-        return
-
+    site_type = site_map.get(callback.data, callback.data)
     data = await state.get_data()
+    user = get_user_info(callback.message)
 
     admin_text = (
         "🆕 <b>Yangi ariza — Sayt buyurtmasi</b>\n\n"
-        f"👤 Ism: {html.escape(data['name'])}\n"
-        f"📱 Telefon: {html.escape(contact.phone_number)}\n"
-        f"📌 Sayt turi: {html.escape(data['site_type'])}\n"
+        f"👤 Ism: {data['name']}\n"
+        f"👤 Familiya: {data['surname']}\n"
+        f"📌 Sayt turi: {site_type}\n"
+        f"🆔 Telegram ID: {user['telegram_id']}\n"
+        f"🔗 Profil: {user['profile']}\n"
         "Adminga murojaat qiling: @shanurkarimov\n"
         f"🕐 Vaqt: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
     )
 
-    await bot.send_message(
-        ADMIN_ID,
-        admin_text,
-        parse_mode="HTML"
-    )
+    await bot.send_message(ADMIN_ID, admin_text, parse_mode="HTML")
 
-    await message.answer(
-        "✅ Arizangiz muvaffaqiyatli yuborildi! Tez orada siz bilan bog'lanaman.",
-        reply_markup=main_menu()
+    await callback.message.answer(
+        "✅ Arizangiz muvaffaqiyatli yuborildi!\n"
+        "@shanurkarimov Admin bilan bog'laning.",
+        reply_markup=main_menu(),
     )
 
     await state.clear()
-
-
-@dp.message(OrderSite.phone)
-async def order_phone_invalid(message: Message):
-    await message.answer(
-        "📱 Iltimos, telefon raqamingizni pastdagi tugma orqali yuboring."
-    )
+    await callback.answer()
 
 
 # ==================== 4. KURSLARIM ====================
@@ -332,26 +202,15 @@ async def courses_handler(message: Message):
     text = (
         "🎓 <b>Kurslarim</b>\n\n"
         "<b>Kurs nomi:</b> Frontend, Python\n"
-        "<b>Tavsif:</b> Dasturlashni noldan o'rganing\n"
+        "<b>Tavsif:</b> Dasturlashni noldan biz bilan birga o'rganing.\n"
         "📝 Kursga yozilish uchun pastdagi tugmani bosing."
     )
 
-    kb = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(
-                    text="📝 Kursga yozilish",
-                    callback_data="enroll_start"
-                )
-            ]
-        ]
-    )
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="📝 Kursga yozilish", callback_data="enroll_start")]
+    ])
 
-    await message.answer(
-        text,
-        reply_markup=kb,
-        parse_mode="HTML"
-    )
+    await message.answer(text, reply_markup=kb, parse_mode="HTML")
 
 
 @dp.callback_query(F.data == "enroll_start")
@@ -361,7 +220,7 @@ async def enroll_from_courses(callback: CallbackQuery, state: FSMContext):
 
     await callback.message.answer(
         "Ismingizni kiriting:",
-        reply_markup=back_menu()
+        reply_markup=back_menu(),
     )
 
     await callback.answer()
@@ -376,81 +235,50 @@ async def enroll_start(message: Message, state: FSMContext):
 
     await message.answer(
         "Ismingizni kiriting:",
-        reply_markup=back_menu()
+        reply_markup=back_menu(),
     )
 
 
 @dp.message(EnrollCourse.name)
 async def enroll_name(message: Message, state: FSMContext):
-    if not message.text:
-        await message.answer("Iltimos, ismingizni matn ko'rinishida kiriting.")
-        return
-
     await state.update_data(name=message.text)
+    await state.set_state(EnrollCourse.surname)
+
+    await message.answer("Familiyangizni kiriting:")
+
+
+@dp.message(EnrollCourse.surname)
+async def enroll_surname(message: Message, state: FSMContext):
+    await state.update_data(surname=message.text)
     await state.set_state(EnrollCourse.course)
 
-    await message.answer(
-        "Qaysi kursga yozilmoqchisiz? Kurs nomini kiriting:"
-    )
+    await message.answer("Qaysi kursga yozilmoqchisiz? Kurs nomini kiriting:")
 
 
 @dp.message(EnrollCourse.course)
 async def enroll_course(message: Message, state: FSMContext):
-    if not message.text:
-        await message.answer("Iltimos, kurs nomini matn ko'rinishida kiriting.")
-        return
-
-    await state.update_data(course=message.text)
-    await state.set_state(EnrollCourse.phone)
-
-    await message.answer(
-        "📱 Telefon raqamingizni yuboring:",
-        reply_markup=phone_keyboard()
-    )
-
-
-@dp.message(EnrollCourse.phone, F.contact)
-async def enroll_phone(message: Message, state: FSMContext):
-    contact = message.contact
-
-    if contact.user_id != message.from_user.id:
-        await message.answer(
-            "Iltimos, o'zingizning telefon raqamingizni yuboring."
-        )
-        return
-
     data = await state.get_data()
     user = get_user_info(message)
 
     admin_text = (
         "🆕 <b>Yangi ariza — Kursga yozilish</b>\n\n"
-        f"👤 Ism: {html.escape(data['name'])}\n"
-        f"📱 Telefon: {html.escape(contact.phone_number)}\n"
-        f"📌 Kurs: {html.escape(data['course'])}\n"
+        f"👤 Ism: {data['name']}\n"
+        f"👤 Familiya: {data['surname']}\n"
+        f"📌 Kurs: {message.text}\n"
         f"🆔 Telegram ID: {user['telegram_id']}\n"
-        f"🔗 Profil: {html.escape(user['profile'])}\n"
+        f"🔗 Profil: {user['profile']}\n"
         f"🕐 Vaqt: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
     )
 
-    await bot.send_message(
-        ADMIN_ID,
-        admin_text,
-        parse_mode="HTML"
-    )
+    await bot.send_message(ADMIN_ID, admin_text, parse_mode="HTML")
 
     await message.answer(
-        "✅ Arizangiz muvaffaqiyatli yuborildi! Tez orada siz bilan bog'lanaman.",
-        reply_markup=main_menu()
+        "✅ Arizangiz muvaffaqiyatli yuborildi!\n"
+        "Tez orada siz bilan bog'lanaman.",
+        reply_markup=main_menu(),
     )
 
     await state.clear()
-
-
-@dp.message(EnrollCourse.phone)
-async def enroll_phone_invalid(message: Message):
-    await message.answer(
-        "📱 Iltimos, telefon raqamingizni pastdagi tugma orqali yuboring."
-    )
 
 
 # ==================== 6. LOYIHALARIM ====================
@@ -463,11 +291,7 @@ async def projects_handler(message: Message):
         "<b>Portfoliyo:</b> https://karimovjs.github.io/My.Portfoliyo/\n"
     )
 
-    await message.answer(
-        text,
-        reply_markup=back_menu(),
-        parse_mode="HTML"
-    )
+    await message.answer(text, reply_markup=back_menu(), parse_mode="HTML")
 
 
 # ==================== 7. BOG'LANISH ====================
@@ -480,11 +304,7 @@ async def contact_handler(message: Message):
         "Instagram: https://www.instagram.com/shanur_karimov\n"
     )
 
-    await message.answer(
-        text,
-        reply_markup=back_menu(),
-        parse_mode="HTML"
-    )
+    await message.answer(text, reply_markup=back_menu(), parse_mode="HTML")
 
 
 # ==================== ISHGA TUSHIRISH ====================
